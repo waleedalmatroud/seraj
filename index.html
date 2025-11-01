@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>البحث عن درجات الطلاب</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .search-section {
+            padding: 40px;
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            font-size: 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            outline: none;
+            transition: all 0.3s;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+        }
+        
+        .search-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .search-button {
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .search-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .search-button:active {
+            transform: translateY(0);
+        }
+        
+        .search-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .info-text {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .message.active {
+            display: block;
+        }
+        
+        .message.error {
+            background: #fee;
+            color: #c00;
+            border: 2px solid #fcc;
+        }
+        
+        .message.success {
+            background: #efe;
+            color: #060;
+            border: 2px solid #cfc;
+        }
+        
+        .results {
+            display: none;
+        }
+        
+        .results.active {
+            display: block;
+        }
+        
+        .student-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .student-header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .student-name {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .student-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .info-item {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            border-right: 4px solid #667eea;
+        }
+        
+        .info-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .subjects-section {
+            margin-top: 20px;
+        }
+        
+        .section-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .subjects-grid {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .subject-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            border-right: 5px solid #667eea;
+        }
+        
+        .subject-card:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+        
+        .subject-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .subject-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .grade-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .teacher-name {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        .no-grade {
+            background: #e0e0e0;
+            color: #666;
+        }
+        
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .search-section {
+                padding: 20px;
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .student-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 البحث عن درجات الطلاب</h1>
+            <p>ابحث عن درجات الطالب باستخدام الرقم المدني</p>
+        </div>
+        
+        <div class="search-section">
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    id="civilIdInput" 
+                    class="search-input" 
+                    placeholder="أدخل الرقم المدني (12 رقماً)"
+                    maxlength="12"
+                    pattern="[0-9]*"
+                    inputmode="numeric"
+                >
+                <button id="searchButton" class="search-button">بحث</button>
+            </div>
+            
+            <div class="info-text">
+                الرجاء إدخال الرقم المدني الكامل المكون من 12 رقماً
+            </div>
+            
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>جاري البحث...</p>
+            </div>
+            
+            <div id="message" class="message"></div>
+            
+            <div id="results" class="results"></div>
+        </div>
+    </div>
+
+    <script>
+        // رابط Web App
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzefNxzHZ22sC8lXocsUha4jNI1LHernx9wMSdMB-t_QMPXO8oJqtbmDYHmYZMJO3XRPw/exec';
+        
+        const civilIdInput = document.getElementById('civilIdInput');
+        const searchButton = document.getElementById('searchButton');
+        const loading = document.getElementById('loading');
+        const message = document.getElementById('message');
+        const results = document.getElementById('results');
+        
+        // السماح بالأرقام فقط في حقل الإدخال
+        civilIdInput.addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+        
+        // البحث عند الضغط على Enter
+        civilIdInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+        
+        // البحث عند النقر على الزر
+        searchButton.addEventListener('click', performSearch);
+        
+        function performSearch() {
+            const civilId = civilIdInput.value.trim();
+            
+            // التحقق من صحة الإدخال
+            if (!civilId) {
+                showMessage('الرجاء إدخال الرقم المدني', 'error');
+                return;
+            }
+            
+            if (civilId.length !== 12) {
+                showMessage('الرقم المدني يجب أن يكون 12 رقماً', 'error');
+                return;
+            }
+            
+            if (!/^\d{12}$/.test(civilId)) {
+                showMessage('الرقم المدني يجب أن يحتوي على أرقام فقط', 'error');
+                return;
+            }
+            
+            // إخفاء الرسائل والنتائج السابقة
+            hideMessage();
+            hideResults();
+            
+            // إظهار مؤشر التحميل
+            showLoading();
+            
+            // تعطيل زر البحث
+            searchButton.disabled = true;
+            
+            // إرسال الطلب للـ Web App
+            const url = `${WEB_APP_URL}?civilId=${civilId}`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    hideLoading();
+                    searchButton.disabled = false;
+                    
+                    if (data.success) {
+                        displayResults(data.data);
+                        showMessage('تم العثور على الطالب بنجاح!', 'success');
+                    } else {
+                        showMessage(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    hideLoading();
+                    searchButton.disabled = false;
+                    showMessage('حدث خطأ في الاتصال. الرجاء المحاولة مرة أخرى.', 'error');
+                });
+        }
+        
+        function displayResults(data) {
+            const html = `
+                <div class="student-card">
+                    <div class="student-header">
+                        <div class="student-name">${data.studentName}</div>
+                        <div class="student-info">
+                            <div class="info-item">
+                                <div class="info-label">الصف</div>
+                                <div class="info-value">${data.className}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">الجنسية</div>
+                                <div class="info-value">${data.nationality}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">الحضور</div>
+                                <div class="info-value">${data.attendance || 'غير محدد'}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="subjects-section">
+                        <div class="section-title">📚 المواد والدرجات</div>
+                        <div class="subjects-grid">
+                            ${data.subjects.map(subject => `
+                                <div class="subject-card">
+                                    <div class="subject-header">
+                                        <div class="subject-name">${subject.subject}</div>
+                                        <div class="grade-badge ${!subject.grade ? 'no-grade' : ''}">
+                                            ${subject.grade || '-'}
+                                        </div>
+                                    </div>
+                                    ${subject.teacher ? `
+                                        <div class="teacher-name">👨‍🏫 ${subject.teacher}</div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            results.innerHTML = html;
+            results.classList.add('active');
+            
+            // التمرير إلى النتائج
+            setTimeout(() => {
+                results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+        
+        function showLoading() {
+            loading.classList.add('active');
+        }
+        
+        function hideLoading() {
+            loading.classList.remove('active');
+        }
+        
+        function showMessage(text, type) {
+            message.textContent = text;
+            message.className = `message active ${type}`;
+        }
+        
+        function hideMessage() {
+            message.classList.remove('active');
+        }
+        
+        function hideResults() {
+            results.classList.remove('active');
+        }
+    </script>
+</body>
+</html>
