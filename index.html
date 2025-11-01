@@ -33,6 +33,20 @@
             color: white;
             padding: 30px;
             text-align: center;
+            position: relative;
+        }
+        
+        .header-logo {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            background: white;
+            padding: 10px;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
         
         .header h1 {
@@ -288,6 +302,13 @@
                 font-size: 24px;
             }
             
+            .header-logo {
+                width: 60px;
+                height: 60px;
+                top: 15px;
+                right: 15px;
+            }
+            
             .search-section {
                 padding: 20px;
             }
@@ -305,6 +326,7 @@
 <body>
     <div class="container">
         <div class="header">
+            <img src="https://cdn.discordapp.com/attachments/243148745099706368/1434260394242867272/Untitlded-2.png" alt="شعار المدرسة" class="header-logo">
             <h1>🔍 البحث عن درجات الطلاب</h1>
             <p>ابحث عن درجات الطالب باستخدام الرقم المدني</p>
         </div>
